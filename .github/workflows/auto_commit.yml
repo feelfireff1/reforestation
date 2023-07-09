@@ -1,0 +1,44 @@
+# Name of the workflow
+name: Auto commit
+
+# Trigger the workflow every 20 minutes
+on:
+  schedule:
+    - cron: '*/20 * * * *'
+
+# Define the jobs
+jobs:
+  auto_commit:
+    # Run the job on ubuntu-latest
+    runs-on: ubuntu-latest
+    # Define the steps
+    steps:
+      # Set global directory
+      - name: Set global directory
+        run: git config --global --add safe.directory /github/workspace
+      # Checkout the repository
+      - uses: actions/checkout@v3     
+        with:
+         persist-credentials: false
+         fetch-depth: 1
+      # Modify last update file
+      - name: Modify last update
+        run: |
+          cat > LAST_UPDATED
+          d=`date '+%Y-%m-%dT%H:%M:%SZ'`
+          echo $d > LAST_UPDATED          
+      # Commit changes
+      - name: Commit changes
+        run: |
+          git config --local user.email "feelfireff1@gmail.com"
+          git config --local user.name "feelfireff1"
+          git add -A
+          git commit -m "reforestation process"          
+      # Push changes to GitHub
+      - name: GitHub Push
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          force: true
+          directory: "."
+          branch: main
+          github_token: ${{ secrets.THE_GHUB_TOKEN }}
